@@ -2,9 +2,15 @@ from django.shortcuts import get_object_or_404
 from api.models import Cost, Group, User
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from djoser.views import UserViewSet
 
 from .permissions import IsAuthorOrReadOnly
-from .serializers import CostSerializer, GroupSerializer
+from .serializers import CostSerializer, GroupSerializer, CustomUserSerializer
+
+
+class CustomUserViewSet(UserViewSet):
+    queryset = User.objects.all()
+    serializer_class = CustomUserSerializer
 
 
 class CostViewSet(viewsets.ModelViewSet):

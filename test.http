@@ -1,6 +1,6 @@
-GET http://dmitrypetukhov90.pythonanywhere.com/api/v1/costs/
+GET http://127.0.0.1:8000/api/v1/costs/
 Content-type: application/json; charset=utf-8
-Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1NTgwMjg3LCJqdGkiOiJjMmE5NDYyYzY4Nzk0MDU3YmFkNTc0OGQ5YTNjYjZmZCIsInVzZXJfaWQiOjR9.5dplNX1otwoGmTcri3e340RdM8mBBu9qJT_a2MC1dsA
 #Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
 #Authorization: Token b7bb38ae368205d2a058554f96d28f8193634013
 
@@ -77,7 +77,7 @@ Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
 }
 
 ###
-POST http://dmitrypetukhov90.pythonanywhere.com/api/v1/api-token-auth/
+POST http://127.0.0.1:8000/auth/jwt/create/
 Content-type: application/json; charset=utf-8
 #Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
 
@@ -87,11 +87,21 @@ Content-type: application/json; charset=utf-8
 }
 
 ###
-POST http://127.0.0.1:8000/api/v1/api-token-auth/
+POST http://127.0.0.1:8000/auth/users/
 Content-type: application/json; charset=utf-8
 #Authorization: Token b7bb38ae368205d2a058554f96d28f8193634013
 
 {
-    "username": "admin2",
-    "password": "20756320"
+    "username": "Dimon",
+    "password": "Zima19011990*"
+}
+
+###
+POST http://127.0.0.1:8000/auth/jwt/create/
+Content-type: application/json; charset=utf-8
+#Authorization: Token b7bb38ae368205d2a058554f96d28f8193634013
+
+{
+    "username": "Dimon2",
+    "password": "Leto19011990**"
 }
