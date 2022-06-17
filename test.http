@@ -1,6 +1,9 @@
 GET http://dmitrypetukhov90.pythonanywhere.com/api/v1/costs/
 Content-type: application/json; charset=utf-8
 Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+#Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+#Authorization: Token b7bb38ae368205d2a058554f96d28f8193634013
+
 
 ###
 GET http://dmitrypetukhov90.pythonanywhere.com/api/v1/costs/
@@ -13,8 +16,8 @@ Content-type: application/json; charset=utf-8
 Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
 
 {
-    "cost": 122,
-    "group": 1
+    "cost": 185,
+    "group": 2
 
 }
 
