@@ -1,0 +1,66 @@
+GET http://127.0.0.1:8000/api/v1/costs/
+Content-type: application/json; charset=utf-8
+Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+
+###
+GET http://127.0.0.1:8000/api/v1/posts/2/comments/
+Content-type: application/json; charset=utf-8
+Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+
+###
+POST http://127.0.0.1:8000/api/v1/posts/2/comments/
+Content-type: application/json; charset=utf-8
+Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+
+{
+    "text": "Тестовый коммент6",
+    "author": "username8"
+
+}
+
+###
+GET http://127.0.0.1:8000/api/v1/posts/2/
+Content-type: application/json; charset=utf-8
+Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+
+{
+    "text": "Тестирую PATCH152"
+}
+
+###
+DELETE http://127.0.0.1:8000/api/v1/posts/4/
+Content-type: application/json; charset=utf-8
+Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+
+{
+    "text": "Тестирую PATCH222"
+}
+
+###
+POST http://127.0.0.1:8000/api/v1/posts/
+Content-type: application/json; charset=utf-8
+Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+
+{
+    "text": "Тестирую пост админ2"
+}
+
+###
+GET http://127.0.0.1:8000/api/v1/posts/
+Content-type: application/json; charset=utf-8
+Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+
+{
+    "text": "коммент3",
+    "author": "Автор"
+}
+
+###
+POST http://127.0.0.1:8000/api/v1/api-token-auth/
+Content-type: application/json; charset=utf-8
+#Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+
+{
+    "username": "admin",
+    "password": "20756320"
+}
