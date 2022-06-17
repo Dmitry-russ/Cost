@@ -5,6 +5,8 @@ User = get_user_model()
 
 
 class Group(models.Model):
+    """Тип расходов."""
+
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
     description = models.TextField()
@@ -14,6 +16,8 @@ class Group(models.Model):
 
 
 class Cost(models.Model):
+    """База расходов."""
+
     cost = models.IntegerField()
     pub_date = models.DateTimeField(
         'Дата записи', auto_now_add=True
