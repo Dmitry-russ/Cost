@@ -23,7 +23,7 @@ class Cost(models.Model):
         'Дата записи', auto_now_add=True
     )
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='posts'
+        User, on_delete=models.CASCADE, related_name='costs'
     )
     group = models.ForeignKey(
         Group, on_delete=models.CASCADE,

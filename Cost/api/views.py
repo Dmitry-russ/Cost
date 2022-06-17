@@ -1,4 +1,5 @@
-from api.models import Cost, Group
+from django.shortcuts import get_object_or_404
+from api.models import Cost, Group, User
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
@@ -7,12 +8,15 @@ from .serializers import CostSerializer, GroupSerializer
 
 
 class CostViewSet(viewsets.ModelViewSet):
-    queryset = Cost.objects.all()
     serializer_class = CostSerializer
     permission_classes = (IsAuthenticated, IsAuthorOrReadOnly)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    def get_queryset(self):
+        author = get_object_or_404(User, id=self.request.user.id)
+        return author.costs.all()
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
