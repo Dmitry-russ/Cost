@@ -58,12 +58,14 @@ Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
 }
 
 ###
-POST http://127.0.0.1:8000/api/v1/posts/
+GET http://127.0.0.1:8000/api/v1/costs/
 Content-type: application/json; charset=utf-8
-Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1NjA1OTY2LCJqdGkiOiJkYzNjMjRjMjBiNzQ0NzA1YWRhZjMxODU5MmQ3MmJhYiIsInVzZXJfaWQiOjF9.OWMW82x4zLv7h_99dr0XHAwox7QicX1zcttSO-9RcQA
 
 {
-    "text": "Тестирую пост админ2"
+    "cost": 185,
+    "group": 1
+
 }
 
 ###

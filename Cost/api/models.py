@@ -19,6 +19,7 @@ class Cost(models.Model):
     """База расходов."""
 
     cost = models.IntegerField()
+    text = models.CharField(max_length=200, null=True)
     pub_date = models.DateTimeField(
         'Дата записи', auto_now_add=True
     )
