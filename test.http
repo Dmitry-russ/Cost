@@ -22,9 +22,9 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiY
 }
 
 ###
-GET http://127.0.0.1:8000/api/v1/posts/2/comments/
+GET http://127.0.0.1:8000/api/v1/costs/
 Content-type: application/json; charset=utf-8
-Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+Authorization: Bearer f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
 
 ###
 POST http://127.0.0.1:8000/api/v1/posts/2/comments/
@@ -58,24 +58,23 @@ Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
 }
 
 ###
-GET http://127.0.0.1:8000/api/v1/costs/
+GET http://127.0.0.1:8000/api/v1/costs/1186342765
 Content-type: application/json; charset=utf-8
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1NjA1OTY2LCJqdGkiOiJkYzNjMjRjMjBiNzQ0NzA1YWRhZjMxODU5MmQ3MmJhYiIsInVzZXJfaWQiOjF9.OWMW82x4zLv7h_99dr0XHAwox7QicX1zcttSO-9RcQA
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1NjM2ODM0LCJqdGkiOiI1MzNhMWY1MzQxYjM0YWUxYWIyMmU5MmM4NWQzMDI0NyIsInVzZXJfaWQiOjF9.QVFDpwyZGirhbSMPve1WrTDtuhZq8LkGCMKc-FYO09M
 
 {
     "cost": 185,
     "group": 1
-
 }
 
 ###
-GET http://127.0.0.1:8000/api/v1/posts/
+POST http://127.0.0.1:8000/api/v1/costs/1186342765
 Content-type: application/json; charset=utf-8
-Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1NjM2ODM0LCJqdGkiOiI1MzNhMWY1MzQxYjM0YWUxYWIyMmU5MmM4NWQzMDI0NyIsInVzZXJfaWQiOjF9.QVFDpwyZGirhbSMPve1WrTDtuhZq8LkGCMKc-FYO09M
 
 {
-    "text": "коммент3",
-    "author": "Автор"
+    "cost": 440,
+    "group": 1
 }
 
 ###
@@ -84,8 +83,18 @@ Content-type: application/json; charset=utf-8
 #Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
 
 {
-    "username": "admin",
-    "password": "20756320"
+    "username": "Dimon",
+    "password": "20756320privet"
+}
+
+###
+GET  http://127.0.0.1:8000/auth/users/
+Content-type: application/json; charset=utf-8
+#Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+
+{
+    "username": "Dimon",
+    "password": "20756320privet"
 }
 
 ###
@@ -94,16 +103,16 @@ Content-type: application/json; charset=utf-8
 #Authorization: Token b7bb38ae368205d2a058554f96d28f8193634013
 
 {
-    "username": "Dimon",
-    "password": "Zima19011990*"
+    "username": "Dimons",
+    "password": "Privet4545*"
 }
 
 ###
 POST http://dmitrypetukhov90.pythonanywhere.com/auth/jwt/create/
 Content-type: application/json; charset=utf-8
-#Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1NTgwNTUzLCJqdGkiOiIyZjE2YTZhZjg1OGQ0MDYwYjA1YjYwNWI2MTY1ODk0OCIsInVzZXJfaWQiOjN9.k7MyOPjIzQ43mZ-5r8OwB0v_Ri7nQasfEbaNGUAWdJc
+#Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1NjYzMzkyLCJqdGkiOiI0MTJiZDI1OWFhODU0MmJlOWFlYmU4OWRmMTVhOTdiYiIsInVzZXJfaWQiOjR9.YlGg9WTfxTbdwyzqQ6D7mYgSGRrDMif-vNjiItUJTUI
 
 {
-    "username": "Dimon",
-    "password": "Zima19011990*"
+    "username": "Dimons",
+    "password": "Privet4545*"
 }

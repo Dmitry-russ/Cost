@@ -21,8 +21,9 @@ class CostViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     def get_queryset(self):
-        author = get_object_or_404(User, id=self.request.user.id)
-        return author.costs.all()
+        chat_id = self.kwargs.get("id")
+        return Cost.objects.filter(chat_id=chat_id)
+        #1186342765
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
