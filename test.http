@@ -6,9 +6,9 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiY
 
 
 ###
-GET http://dmitrypetukhov90.pythonanywhere.com/api/v1/costs/
+GET http://dmitrypetukhov90.pythonanywhere.com/api/v1/groups/
 Content-type: application/json; charset=utf-8
-Authorization: Token f9fccb835d5d7d93a9b9aa35be0725ff4c0fcf01
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1ODMwOTY4LCJqdGkiOiJjYmIzMGU5YjE1YmY0ZmNhOGUzZDA4MzYxMGJlNGQzNCIsInVzZXJfaWQiOjN9.xgTIAISZrDLSvHfFawNEU18009lVd3524qa2iutYHuQ
 
 ###
 POST http://dmitrypetukhov90.pythonanywhere.com/api/v1/costs/1186342765

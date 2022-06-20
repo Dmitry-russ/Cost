@@ -1,39 +1,40 @@
 import logging
-import os
-import sys
-import time
-from http import HTTPStatus
 
-import requests
-from dotenv import load_dotenv
-from telegram import Bot
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    Filters,
+    ConversationHandler,
+)
 
-import logging
-import os
-from telegram import ReplyKeyboardMarkup, Bot
-from telegram.ext import CommandHandler, Updater, MessageHandler, ConversationHandler, Filters
+FAST_GROUP, ALL_GROUP, = range(2)
 
-from exceptions import SendMessageError, NotIndexError
+def select_group(update, _):
+    reply_keyboard = [['Проезд', 'Продукты', 'Другое']]
+    markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+    update.message.reply_text(
+        'Выберете категорию',
+        reply_markup=markup_key,)
+    chat_id = update.effective_chat.id
+    username = update.message.chat.first_name
+    k=update.message.text
+    return FAST_GROUP
 
-def conversation():
+def select_group_all(update, _):
+    reply_keyboard = [['Семья', 'Дом', 'Нет категории']]
+    markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+    update.message.reply_text(
+        'Выберете категорию',
+        reply_markup=markup_key,)
+    return ConversationHandler.END
 
-    # Определяем обработчик разговоров `ConversationHandler` 
-    # с состояниями GENDER, PHOTO, LOCATION и BIO
-    conv_handler = ConversationHandler( # здесь строится логика разговора
-        # точка входа в разговор
-        entry_points=[CommandHandler('start', start)],
-        # этапы разговора, каждый со своим списком обработчиков сообщений
-        states={
-            GENDER: [MessageHandler(Filters.regex('^(Boy|Girl|Other)$'), gender)],
-            PHOTO: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
-            LOCATION: [
-                MessageHandler(Filters.location, location),
-                CommandHandler('skip', skip_location),
-            ],
-            BIO: [MessageHandler(Filters.text & ~Filters.command, bio)],
-        },
-        # точка выхода из разговора
-        fallbacks=[CommandHandler('cancel', cancel)],
+def cancel(update, _):
+    update.message.reply_text(
+        'ввод отменен', 
+        reply_markup=ReplyKeyboardRemove()
     )
+    return ConversationHandler.END
 
-    pass
+

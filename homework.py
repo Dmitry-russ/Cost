@@ -10,6 +10,7 @@ from telegram import Bot
 
 import logging
 import os
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram import ReplyKeyboardMarkup, Bot
 from telegram.ext import CommandHandler, Updater, MessageHandler, ConversationHandler, Filters
 
@@ -20,6 +21,7 @@ load_dotenv()
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 ENDPOINT: str = 'http://dmitrypetukhov90.pythonanywhere.com/api/v1/costs/'
+GROUP_ENDPOINT: str = 'http://dmitrypetukhov90.pythonanywhere.com/api/v1/groups/'
 USER_ENDPOINT: str = 'http://dmitrypetukhov90.pythonanywhere.com/auth/jwt/create/'
 
 response = requests.post(
@@ -28,8 +30,57 @@ response = requests.post(
     ).json()
 API_TOKEN =f'Bearer {response.get("access")}'
 
-
 logger = logging.getLogger()
+
+COST: int = 0
+ALL_GROUP, END = range(2)
+
+def select_group_all(update, _):
+    text = update.message.text
+    chat = update.effective_chat
+    if text == 'Проезд' or text == 'Продукты':
+        requests.post(
+            url= ENDPOINT,
+            headers={'Authorization': API_TOKEN},
+            data={'chat_id': chat.id, 'cost': COST, 'group': 1}
+        ).json()
+        update.message.reply_text(
+        'Каиегория Проезд принята', 
+        reply_markup=ReplyKeyboardRemove()
+        )
+        COST = 0
+        return ConversationHandler.END
+    elif text == 'Продукты':
+        requests.post(
+            url= ENDPOINT,
+            headers={'Authorization': API_TOKEN},
+            data={'chat_id': chat.id, 'cost': COST, 'group': 2}
+        ).json()
+        update.message.reply_text(
+        'Каиегория Проезд принята', 
+        reply_markup=ReplyKeyboardRemove()
+        )
+        COST = 0
+        return ConversationHandler.END
+    reply_keyboard = [['Семья', 'Дом', 'Нет категории']]
+    markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+    update.message.reply_text(
+        'Выберете категорию',
+        reply_markup=markup_key,)
+    return END
+
+def end(update, _):
+    update.message.reply_text(
+        'Спасибо! Категория принята.',
+        reply_markup=ReplyKeyboardRemove())
+    return ConversationHandler.END
+
+def cancel(update, _):
+    update.message.reply_text(
+        'ввод отменен', 
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return ConversationHandler.END
 
 
 def check_tokens() -> bool:
@@ -41,15 +92,14 @@ def have_massege(update, context):
     chat = update.effective_chat
     text = update.message.text
     if text.isdigit():
-        requests.post(
-            url= ENDPOINT,
-            headers={'Authorization': API_TOKEN},
-            data={'chat_id': chat.id, 'cost': int(text), 'group': 1}
-        ).json()
-        context.bot.send_message(
-            chat_id=chat.id,
-            text='Принято!',
-        )
+        group_in_text = group_load()
+        reply_keyboard = [group_in_text]
+        markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+        update.message.reply_text(
+            'Выберете категорию',
+            reply_markup=markup_key,)
+        COST = update.message.text
+        return ALL_GROUP
 
 def wake_up(update, context):
     chat_id = update.effective_chat.id
@@ -66,13 +116,28 @@ def check(update, context):
         url= ENDPOINT+str(chat_id),
         headers={'Authorization': API_TOKEN},
         )
-    summ: int  = 0
+    summ1: int  = 0
+    summ2: int  = 0
     for r in response.json():
-        summ = summ+int(r.get("cost"))
+        if r.get("group") == 1:
+            summ1 = summ1+int(r.get("cost"))
+        else:
+            summ2 = summ2+int(r.get("cost"))
+
     context.bot.send_message(
         chat_id=chat_id,
-        text=f'Всего расходов: {summ}',
+        text=f'Всего расходов по группе проезд: {summ1}, по группе продукты: {summ2}, ',
         )
+
+def group_load():
+    group_in_text: list = []
+    response = requests.get(
+        url= GROUP_ENDPOINT,
+        headers={'Authorization': API_TOKEN},
+        )
+    for r in response.json():
+        group_in_text.append(r.get("title"))
+    return group_in_text
 
 def main():
     """Основная логика работы бота."""
@@ -87,8 +152,18 @@ def main():
 
     updater.dispatcher.add_handler(CommandHandler('start', wake_up))
     updater.dispatcher.add_handler(CommandHandler('check', check))
-    updater.dispatcher.add_handler(MessageHandler(Filters.text, have_massege))
-    
+    #updater.dispatcher.add_handler(MessageHandler(Filters.text, have_massege))
+
+
+    conv_handler = ConversationHandler(
+        entry_points=[MessageHandler(Filters.text, have_massege)],
+        states={
+            ALL_GROUP: [MessageHandler(Filters.regex('^(Проезд|Продукты|Разное)$'), select_group_all)],
+            END: [MessageHandler(Filters.regex('^(Семья|Дом|Нет категории)$'), end)],},
+        fallbacks=[CommandHandler('cancel', cancel)],
+        )
+
+    updater.dispatcher.add_handler(conv_handler)
 
     updater.start_polling()
     updater.idle()
