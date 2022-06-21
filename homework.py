@@ -1,93 +1,87 @@
 import logging
-import sys
 import os
+import sys
 
-import requests
 from dotenv import load_dotenv
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram.ext import (CommandHandler, Updater, MessageHandler,
+                          ConversationHandler, Filters)
 
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Bot
-from telegram.ext import CommandHandler, Updater, MessageHandler, ConversationHandler, Filters
-
+from getapi import get_token, post_api, group_load, get_all_costs
 
 load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_TOKEN')
-
+USER = os.getenv('USER')
+PASSWORD = os.getenv('PASSWORD')
 
 ENDPOINT: str = 'http://dmitrypetukhov90.pythonanywhere.com/api/v1/costs/'
-GROUP_ENDPOINT: str = 'http://dmitrypetukhov90.pythonanywhere.com/api/v1/groups/'
-USER_ENDPOINT: str = 'http://dmitrypetukhov90.pythonanywhere.com/auth/jwt/create/'
+GROUP_ENDPOINT: str = (
+    'http://dmitrypetukhov90.pythonanywhere.com/api/v1/groups/')
+USER_ENDPOINT: str = (
+    'http://dmitrypetukhov90.pythonanywhere.com/auth/jwt/create/')
+
+#  для хранения данных о введенном расходе на время выбора группы
 COST: dict = {}
-
-response = requests.post(
-        url=USER_ENDPOINT,
-        data={'username': 'Dimons', 'password': 'Privet4545*'}
-    ).json()
-API_TOKEN = f'Bearer {response.get("access")}'
-
+#  получаем доступ к api
+API_TOKEN = get_token(USER_ENDPOINT, USER, PASSWORD)
 logger = logging.getLogger()
-
 ALL_GROUP, END = range(2)
 
 
 def wake_up(update, context):
+    """Приветствие."""
     chat_id = update.effective_chat.id
     username = update.message.chat.first_name
     context.bot.send_message(
         chat_id=chat_id,
         text=f'{username} привет! Я бот, который поможет тебе контролировать свои расходы.'
-             f'Я могу работать только с целыми числами. введи любое число....',
-        )
+             f'Я могу работать только с целыми числами. Введи любое число, выбери категорию и все!'
+             f'Для вывода статистики используй команду /check.',
+    )
+    logging.info(f'Пользователь {username}, {chat_id} запустил чат.')
 
 
 def have_massege(update, context):
+    """Обработка первичного сообщения о расходе."""
     chat = update.effective_chat
     text = update.message.text
     if text.isdigit():
-        group_in_text = group_load()
-        reply_keyboard = [group_in_text]
-        markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+        markup_key = ReplyKeyboardMarkup(
+            [group_load(GROUP_ENDPOINT, API_TOKEN)], one_time_keyboard=True)
         update.message.reply_text(
-            'Выберете категорию:',
-            reply_markup=markup_key,)
+            'Выберете категорию расхода. Для отмены нажмите /cancel.',
+            reply_markup=markup_key, )
         COST[chat.id] = text
         return ALL_GROUP
 
 
-def select_group_all(update, _):
+def cost_download(update, _):
+    """Основная функция сохранения даных в соответствии с группой расходов."""
     text = update.message.text
     chat = update.effective_chat
-    group_in_text = group_load()
+    group_in_text: list = ['Список групп расходов', ]
+    group_in_text += group_load(GROUP_ENDPOINT, API_TOKEN)
     if text in group_in_text:
-        group_id = group_in_text.index(text) + 1
+        group_id = group_in_text.index(text)
         cost = int(COST.get(chat.id))
-        requests.post(
-            url=ENDPOINT,
-            headers={'Authorization': API_TOKEN},
-            data={'chat_id': chat.id, 'cost': cost, 'group': group_id}
-        ).json()
+        post_api(ENDPOINT, API_TOKEN, chat.id, cost, group_id)
         update.message.reply_text(
-            f'Категория {text} принята.',
+            f'Расход по категории "{text}" записан и составил: {cost}.',
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
     update.message.reply_text(
         'Категория не выбрана.',
         reply_markup=ReplyKeyboardRemove()
-        )
-    return ConversationHandler.END
-
-
-def end(update, _):
-    update.message.reply_text(
-        'Спасибо! Категория принята.',
-        reply_markup=ReplyKeyboardRemove())
+    )
     return ConversationHandler.END
 
 
 def cancel(update, _):
+    """Отмена ввода расхода."""
     update.message.reply_text(
-        'ввод отменен',
+        'Ввод отменен.',
         reply_markup=ReplyKeyboardRemove()
     )
     return ConversationHandler.END
@@ -100,32 +94,16 @@ def check_tokens() -> bool:
 
 
 def check(update, context):
+    """Запрос статистики расходов."""
     chat_id = update.effective_chat.id
-    #  text = update.message.text
-    response = requests.get(
-        url=ENDPOINT+str(chat_id),
-        headers={'Authorization': API_TOKEN},
-        )
+    response = get_all_costs(ENDPOINT, chat_id, API_TOKEN)
     group_dict: dict = {r.get("group"): 0 for r in response.json()}
-    sum = 0
     for r in response.json():
         group_dict[r.get("group")] += int(r.get("cost"))
-        sum += int(r.get("cost"))
-        text = []
-    group_in_text = group_load()
+    group_dict["всего"] = sum(group_dict.values())
     for group in group_dict:
-        text = f'Всего расходов по группе {group_in_text[group-1]}: {group_dict[group]} .'
+        text = f'Всего расходов по: {group}: {group_dict[group]} .'
         context.bot.send_message(chat_id=chat_id, text=text)
-    text = f'Всего расходов: {sum} .'
-    context.bot.send_message(chat_id=chat_id, text=text)
-
-
-def group_load():
-    response = requests.get(
-        url=GROUP_ENDPOINT,
-        headers={'Authorization': API_TOKEN},
-        )
-    return [r.get("title") for r in response.json()]
 
 
 def main():
@@ -136,19 +114,22 @@ def main():
         raise sys.exit()
     logging.info('Main function is strating.')
 
-    bot = Bot(token=TELEGRAM_BOT_TOKEN)
+    group_in_text: str = ""
+    for group in group_load(GROUP_ENDPOINT, API_TOKEN):
+        group_in_text += group + '|'
+
     updater = Updater(token=TELEGRAM_BOT_TOKEN)
 
     updater.dispatcher.add_handler(CommandHandler('start', wake_up))
     updater.dispatcher.add_handler(CommandHandler('check', check))
-    #  updater.dispatcher.add_handler(MessageHandler(Filters.text, have_massege))
     conv_handler = ConversationHandler(
         entry_points=[MessageHandler(Filters.text, have_massege)],
         states={
-            ALL_GROUP: [MessageHandler(Filters.regex('^(Проезд|Продукты|Разное)$'), select_group_all)],
-            END: [MessageHandler(Filters.regex('^(Семья|Дом|Нет категории)$'), end)], },
+            ALL_GROUP: [
+                MessageHandler(Filters.regex(f'^({group_in_text})$'),
+                               cost_download)]},
         fallbacks=[CommandHandler('cancel', cancel)],
-        )
+    )
 
     updater.dispatcher.add_handler(conv_handler)
 
