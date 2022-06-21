@@ -87,12 +87,6 @@ def cancel(update, _):
     return ConversationHandler.END
 
 
-def check_tokens() -> bool:
-    """Проверка наличия переменных в окружении."""
-    logging.info('Check_tokens is starting.')
-    return all([TELEGRAM_BOT_TOKEN, ])
-
-
 def check(update, context):
     """Запрос статистики расходов."""
     chat_id = update.effective_chat.id
@@ -104,6 +98,12 @@ def check(update, context):
     for group in group_dict:
         text = f'Всего расходов по: {group}: {group_dict[group]} .'
         context.bot.send_message(chat_id=chat_id, text=text)
+
+
+def check_tokens() -> bool:
+    """Проверка наличия переменных в окружении."""
+    logging.info('Check_tokens is starting.')
+    return all([TELEGRAM_BOT_TOKEN, ])
 
 
 def main():

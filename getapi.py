@@ -27,7 +27,7 @@ def group_load(GROUP_ENDPOINT, API_TOKEN):
     return [r.get("title") for r in response.json()]
 
 def get_all_costs(ENDPOINT, chat_id, API_TOKEN):
-    """Запрос данных о все сохраненных расхода пользователя."""
+    """Запрос данных о всех сохраненных расхода пользователя."""
     response = requests.get(
         url= ENDPOINT+str(chat_id),
         headers={'Authorization': API_TOKEN},
