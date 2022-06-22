@@ -71,7 +71,7 @@ def cost_download(update, _):
         cost = int(COST.get(chat.id))
         post_api(ENDPOINT, API_TOKEN, chat.id, cost, group_id)
         update.message.reply_text(
-            f'Расход сумме {cost} рублей запиан в категорию: "{text}" .',
+            f'Расход в сумме {cost} рублей запиан в категорию: "{text}" .',
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
@@ -92,7 +92,7 @@ def cancel(update, _):
 
 
 def check(update, context):
-    """Запрос статистики расходов."""
+    """Запрос статистики расходов по категориям."""
     chat_id = update.effective_chat.id
     response = get_all_costs(ENDPOINT, chat_id, API_TOKEN)
     group_dict: dict = {r.get("group"): 0 for r in response.json()}
@@ -102,7 +102,7 @@ def check(update, context):
     group_dict["всего"] = sum(group_dict.values())
     group_id_title_dict = group_id_title(GROUP_ENDPOINT, API_TOKEN)
     group_id_title_dict["всего"] = "всего"
-    text = (f'Всего расходов по категориям: ')
+    text = ('Всего расходов по категориям: ')
     context.bot.send_message(chat_id=chat_id, text=text)
     for group in group_dict:
         text = (f'{str((group_id_title_dict.get(group))).lower()}: '
