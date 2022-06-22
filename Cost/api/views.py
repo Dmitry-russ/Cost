@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from api.models import Cost, Group, User
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -23,7 +22,6 @@ class CostViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         chat_id = self.kwargs.get("id")
         return Cost.objects.filter(chat_id=chat_id)
-        #1186342765
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):

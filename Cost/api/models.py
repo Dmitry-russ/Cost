@@ -29,7 +29,7 @@ class Cost(models.Model):
     )
     group = models.ForeignKey(
         Group, on_delete=models.CASCADE,
-        related_name="posts", blank=True, null=True
+        related_name="costs", blank=True, null=True
     )
 
     def __str__(self):

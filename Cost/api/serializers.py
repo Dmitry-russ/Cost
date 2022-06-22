@@ -14,10 +14,6 @@ class CostSerializer(serializers.ModelSerializer):
         slug_field='username',
         read_only=True
     )
-    group = serializers.SlugRelatedField(
-        slug_field='title',
-        read_only=True
-    )
     text = serializers.CharField(required=False)
 
     class Meta:

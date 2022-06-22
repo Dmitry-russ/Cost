@@ -7,7 +7,8 @@ from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (CommandHandler, Updater, MessageHandler,
                           ConversationHandler, Filters)
 
-from getapi import get_token, post_api, group_load, get_all_costs
+from getapi import (get_token, post_api,
+                    group_load, get_all_costs, group_id_title)
 
 load_dotenv()
 
@@ -94,11 +95,15 @@ def check(update, context):
     chat_id = update.effective_chat.id
     response = get_all_costs(ENDPOINT, chat_id, API_TOKEN)
     group_dict: dict = {r.get("group"): 0 for r in response.json()}
+
     for r in response.json():
         group_dict[r.get("group")] += int(r.get("cost"))
     group_dict["всего"] = sum(group_dict.values())
+
+    group_id_title_dict = group_id_title(GROUP_ENDPOINT, API_TOKEN)
     for group in group_dict:
-        text = f'Всего расходов по: {group}: {group_dict[group]} .'
+        text = (f'Всего расходов по: '
+                f'{group_id_title_dict.get(group)}: {group_dict[group]} .')
         context.bot.send_message(chat_id=chat_id, text=text)
 
 
