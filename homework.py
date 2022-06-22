@@ -37,9 +37,9 @@ def wake_up(update, context):
     context.bot.send_message(
         chat_id=chat_id,
         text=f'{username} привет! Я бот, который поможет тебе '
-             f'контролировать твои расходы.'
+             f'контролировать твои расходы. '
              f'Я могу работать только с целыми числами. '
-             f'Введи любое число, выбери категорию и все!'
+             f'Введи любое число, выбери категорию и все! '
              f'Для вывода статистики используй команду /check.',
     )
     logging.info(f'Пользователь {username}, {chat_id} запустил чат.')
@@ -51,7 +51,8 @@ def have_massege(update, context):
     text = update.message.text
     if text.isdigit():
         markup_key = ReplyKeyboardMarkup(
-            [group_load(GROUP_ENDPOINT, API_TOKEN)], one_time_keyboard=True)
+            [group_load(GROUP_ENDPOINT, API_TOKEN)], one_time_keyboard=True,
+            resize_keyboard=True)
         update.message.reply_text(
             'Выберете категорию расхода. Для отмены нажмите /cancel.',
             reply_markup=markup_key, )
@@ -70,7 +71,7 @@ def cost_download(update, _):
         cost = int(COST.get(chat.id))
         post_api(ENDPOINT, API_TOKEN, chat.id, cost, group_id)
         update.message.reply_text(
-            f'Расход по категории "{text}" записан и составил: {cost}.',
+            f'Расход сумме {cost} рублей запиан в категорию: "{text}" .',
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
@@ -99,11 +100,13 @@ def check(update, context):
     for r in response.json():
         group_dict[r.get("group")] += int(r.get("cost"))
     group_dict["всего"] = sum(group_dict.values())
-
     group_id_title_dict = group_id_title(GROUP_ENDPOINT, API_TOKEN)
+    group_id_title_dict["всего"] = "всего"
+    text = (f'Всего расходов по категориям: ')
+    context.bot.send_message(chat_id=chat_id, text=text)
     for group in group_dict:
-        text = (f'Всего расходов по: '
-                f'{group_id_title_dict.get(group)}: {group_dict[group]} .')
+        text = (f'{str((group_id_title_dict.get(group))).lower()}: '
+                f'{group_dict[group]} рублей.')
         context.bot.send_message(chat_id=chat_id, text=text)
 
 

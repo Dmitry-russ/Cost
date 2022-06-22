@@ -35,8 +35,8 @@ def group_id_title(GROUP_ENDPOINT, API_TOKEN):
         headers={'Authorization': API_TOKEN},
     )
     group_id_title_dict: dict = {}
-    for r in response:
-        group_id_title_dict[r.id] = r.title
+    for r in response.json():
+        group_id_title_dict[r.get("id")] = r.get("title")
     return group_id_title_dict
 
 
