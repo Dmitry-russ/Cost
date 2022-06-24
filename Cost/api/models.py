@@ -5,7 +5,7 @@ User = get_user_model()
 
 
 class Group(models.Model):
-    """Тип расходов."""
+    """База типов расходов."""
 
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)

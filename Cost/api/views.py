@@ -8,11 +8,13 @@ from .serializers import CostSerializer, GroupSerializer, CustomUserSerializer
 
 
 class CustomUserViewSet(UserViewSet):
+    """Функция обработки запросов к базе данных пользователей."""
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
 
 
 class CostViewSet(viewsets.ModelViewSet):
+    """Функция обработки запрсов к базе данных расходов."""
     serializer_class = CostSerializer
     permission_classes = (IsAuthenticated, IsAuthorOrReadOnly)
 
@@ -25,5 +27,6 @@ class CostViewSet(viewsets.ModelViewSet):
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
+    """Функция обработки запросов к базе данных категорий расхода."""
     queryset = Group.objects.all()
     serializer_class = GroupSerializer

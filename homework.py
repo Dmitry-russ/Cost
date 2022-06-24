@@ -37,19 +37,23 @@ def wake_up(update, context):
     context.bot.send_message(
         chat_id=chat_id,
         text=f'{username} привет! Я бот, который поможет тебе '
-             f'контролировать твои расходы. '
+             f'контролировать свои расходы. '
              f'Я могу работать только с целыми числами. '
              f'Введи любое число, выбери категорию и все! '
              f'Для вывода статистики используй команду /check.',
     )
-    logging.info(f'Пользователь {username}, {chat_id} запустил чат.')
+    logging.info(f'User {username}, {chat_id} is starting bot')
 
 
 def have_massege(update, context):
     """Обработка первичного сообщения о расходе."""
     chat = update.effective_chat
     text = update.message.text
+    logging.info(
+        f'Just another new messege: {text} from: {chat.id} . '
+        'Next step is check fo digit.')
     if text.isdigit():
+        logging.info('Bot has new digit messege: {text} from: {chat.id} .')
         markup_key = ReplyKeyboardMarkup(
             [group_load(GROUP_ENDPOINT, API_TOKEN)], one_time_keyboard=True,
             resize_keyboard=True)
@@ -57,11 +61,14 @@ def have_massege(update, context):
             'Выберете категорию расхода. Для отмены нажмите /cancel.',
             reply_markup=markup_key, )
         COST[chat.id] = text
+        logging.info(
+            'Messege: {text} from: {chat.id} was saved befor choosing group.')
         return ALL_GROUP
 
 
 def cost_download(update, _):
     """Основная функция сохранения даных в соответствии с группой расходов."""
+    logging.info('Cost download is starting.')
     text = update.message.text
     chat = update.effective_chat
     group_in_text: list = ['Список групп расходов', ]
@@ -71,9 +78,11 @@ def cost_download(update, _):
         cost = int(COST.get(chat.id))
         post_api(ENDPOINT, API_TOKEN, chat.id, cost, group_id)
         update.message.reply_text(
-            f'Расход в сумме {cost} рублей запиан в категорию: "{text}" .',
+            f'Расход в сумме {cost} руб. запиcан в категорию: "{text}" .',
             reply_markup=ReplyKeyboardRemove()
         )
+        logging.info(
+            'Bot has made POST requiest to API with {cost} from: {chat.id} .')
         return ConversationHandler.END
     update.message.reply_text(
         'Категория не выбрана.',
@@ -88,11 +97,13 @@ def cancel(update, _):
         'Ввод отменен.',
         reply_markup=ReplyKeyboardRemove()
     )
+    logging.info('Cancel button.')
     return ConversationHandler.END
 
 
 def check(update, context):
     """Запрос статистики расходов по категориям."""
+    logging.info('Check function is starting.')
     chat_id = update.effective_chat.id
     response = get_all_costs(ENDPOINT, chat_id, API_TOKEN)
     group_dict: dict = {r.get("group"): 0 for r in response.json()}
@@ -104,10 +115,12 @@ def check(update, context):
     group_id_title_dict["всего"] = "всего"
     text = ('Всего расходов по категориям: ')
     context.bot.send_message(chat_id=chat_id, text=text)
+    logging.info(f'Message: {text} was sent to: {chat_id} .')
     for group in group_dict:
         text = (f'{str((group_id_title_dict.get(group))).lower()}: '
-                f'{group_dict[group]} рублей.')
+                f'{group_dict[group]} руб.')
         context.bot.send_message(chat_id=chat_id, text=text)
+        logging.info(f'Message: {text} was sent to: {chat_id} .')
 
 
 def check_tokens() -> bool:
