@@ -44,5 +44,13 @@ source venv/bin/activate
 ```
 pip install -r requirements.txt
 ```
-Создайте файл .env и сохраните в нем TELEGRAM_TOKEN (токен бота), зарегестрированного на апи пользователя USER и пароль PASSWORD.
+Создайте файл .env и сохраните в нем TELEGRAM_TOKEN (токен бота),предварительно зарегестрированного на API пользователя USER и пароль PASSWORD. Регистрация пользователя производится по POST запросу на https://dmitrypetukhov90.pythonanywhere.com/auth/users/:
+```
+{
+    "username": "username",
+    "password": "password"
+}
+```
+
+
 Запустите бота.
