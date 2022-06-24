@@ -31,7 +31,8 @@ ALL_GROUP, END = range(2)
 
 
 def wake_up(update, context):
-    """Приветствие."""
+    """Приветствие при запуске."""
+
     chat_id = update.effective_chat.id
     username = update.message.chat.first_name
     context.bot.send_message(
@@ -47,13 +48,14 @@ def wake_up(update, context):
 
 def have_massege(update, context):
     """Обработка первичного сообщения о расходе."""
+
     chat = update.effective_chat
     text = update.message.text
     logging.info(
         f'Just another new messege: {text} from: {chat.id} . '
-        'Next step is check fo digit.')
+        'Next step is check for digit.')
     if text.isdigit():
-        logging.info('Bot has new digit messege: {text} from: {chat.id} .')
+        logging.info(f'Bot has new digit messege: {text} from: {chat.id} .')
         markup_key = ReplyKeyboardMarkup(
             [group_load(GROUP_ENDPOINT, API_TOKEN)], one_time_keyboard=True,
             resize_keyboard=True)
@@ -68,6 +70,7 @@ def have_massege(update, context):
 
 def cost_download(update, _):
     """Основная функция сохранения даных в соответствии с группой расходов."""
+
     logging.info('Cost download is starting.')
     text = update.message.text
     chat = update.effective_chat
@@ -82,7 +85,8 @@ def cost_download(update, _):
             reply_markup=ReplyKeyboardRemove()
         )
         logging.info(
-            'Bot has made POST requiest to API with {cost} from: {chat.id} .')
+            f'Bot has made POST requiest to API with: {cost} from: {chat.id} .'
+            )
         return ConversationHandler.END
     update.message.reply_text(
         'Категория не выбрана.',
@@ -93,6 +97,7 @@ def cost_download(update, _):
 
 def cancel(update, _):
     """Отмена ввода расхода."""
+
     update.message.reply_text(
         'Ввод отменен.',
         reply_markup=ReplyKeyboardRemove()
@@ -103,6 +108,7 @@ def cancel(update, _):
 
 def check(update, context):
     """Запрос статистики расходов по категориям."""
+
     logging.info('Check function is starting.')
     chat_id = update.effective_chat.id
     response = get_all_costs(ENDPOINT, chat_id, API_TOKEN)
@@ -110,16 +116,15 @@ def check(update, context):
 
     for r in response.json():
         group_dict[r.get("group")] += int(r.get("cost"))
+    #  код ниже мне не нравится, но я пока не знаю как его переделать
     group_dict["всего"] = sum(group_dict.values())
     group_id_title_dict = group_id_title(GROUP_ENDPOINT, API_TOKEN)
     group_id_title_dict["всего"] = "всего"
-    text = ('Всего расходов по категориям: ')
-    context.bot.send_message(chat_id=chat_id, text=text)
+    text: str = 'Всего расходов по категориям: \n'
     logging.info(f'Message: {text} was sent to: {chat_id} .')
-    text = ""
     for group in group_dict:
         text += (f'{str((group_id_title_dict.get(group))).lower()}: '
-                 f'{group_dict[group]} руб. ')
+                 f'{group_dict[group]} руб. \n')
     context.bot.send_message(chat_id=chat_id, text=text)
     logging.info(f'Message: {text} was sent to: {chat_id} .')
 
