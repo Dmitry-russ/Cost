@@ -116,11 +116,12 @@ def check(update, context):
     text = ('Всего расходов по категориям: ')
     context.bot.send_message(chat_id=chat_id, text=text)
     logging.info(f'Message: {text} was sent to: {chat_id} .')
+    text = ""
     for group in group_dict:
-        text = (f'{str((group_id_title_dict.get(group))).lower()}: '
-                f'{group_dict[group]} руб.')
-        context.bot.send_message(chat_id=chat_id, text=text)
-        logging.info(f'Message: {text} was sent to: {chat_id} .')
+        text += (f'{str((group_id_title_dict.get(group))).lower()}: '
+                 f'{group_dict[group]} руб. ')
+    context.bot.send_message(chat_id=chat_id, text=text)
+    logging.info(f'Message: {text} was sent to: {chat_id} .')
 
 
 def check_tokens() -> bool:
