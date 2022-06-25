@@ -131,12 +131,14 @@ def check(update, context):
 
 def check_tokens() -> bool:
     """Проверка наличия переменных в окружении."""
+
     logging.info('Check_tokens is starting.')
     return all([TELEGRAM_BOT_TOKEN, ])
 
 
 def main():
     """Основная логика работы бота."""
+
     if not check_tokens():
         logging.critical('There is no data in the environment. '
                          'The function is stopped.')
