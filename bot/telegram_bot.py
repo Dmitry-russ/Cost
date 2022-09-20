@@ -9,6 +9,7 @@ from telegram.ext import (CommandHandler, Updater, MessageHandler,
 
 from getapi import (get_token, post_api,
                     group_load, get_all_costs, group_id_title)
+from consts import ENDPOINT, GROUP_ENDPOINT, USER_ENDPOINT
 
 load_dotenv()
 
@@ -16,15 +17,10 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_TOKEN')
 USER = os.getenv('USER')
 PASSWORD = os.getenv('PASSWORD')
 
-ENDPOINT: str = 'http://dmitrypetukhov90.pythonanywhere.com/api/v1/costs/'
-GROUP_ENDPOINT: str = (
-    'http://dmitrypetukhov90.pythonanywhere.com/api/v1/groups/')
-USER_ENDPOINT: str = (
-    'http://dmitrypetukhov90.pythonanywhere.com/auth/jwt/create/')
-
 #  для хранения данных о введенном расходе на время выбора группы
 COST: dict = {}
 #  получаем доступ к api
+#  добавь обработку ошибок!
 API_TOKEN = get_token(USER_ENDPOINT, USER, PASSWORD)
 logger = logging.getLogger()
 ALL_GROUP, END = range(2)
