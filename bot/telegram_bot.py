@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import datetime
 
 from dotenv import load_dotenv
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
@@ -17,13 +18,11 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_TOKEN')
 USER = os.getenv('USER')
 PASSWORD = os.getenv('PASSWORD')
 
-#  для хранения данных о введенном расходе на время выбора группы
-COST: dict = {}
 #  получаем доступ к api
 #  добавь обработку ошибок!
 API_TOKEN = get_token(USER_ENDPOINT, USER, PASSWORD)
 logger = logging.getLogger()
-ALL_GROUP, CHECK, END = range(2)
+SAVE, CHECK, END = range(3)
 
 
 def wake_up(update, context):
@@ -60,30 +59,31 @@ def have_massege(update, context):
         update.message.reply_text(
             'Выберете категорию расходов. Для отмены нажмите /cancel.',
             reply_markup=markup_key, )
-        # вот здесь убрать лишний словарь
-        COST[chat.id] = text
+        context.user_data["text"] = text
         logging.info(
             'Messege: {text} from: {chat.id} was saved befor choosing group.')
-        return ALL_GROUP
-    elif text = '/check':
+        return SAVE
+    elif text == '/check':
         markup_key = ReplyKeyboardMarkup(
-            ['Месяц', 'Неделя', 'День'], one_time_keyboard=True,
-            resize_keyboard=True)   
-            # здесь дописать
+            [['Месяц', 'Неделя', 'День']], one_time_keyboard=True,
+            resize_keyboard=True)
+        update.message.reply_text(
+            'Выберете период для расчета статистики. '
+            'Для отмены нажмите /cancel.',
+            reply_markup=markup_key, )
+        return CHECK
 
 
-def cost_download(update, _):
+def cost_save(update, context):
     """Основная функция сохранения даных в соответствии с группой расходов."""
 
     logging.info('Cost download is starting.')
     text = update.message.text
     chat = update.effective_chat
-    group_in_text: list = ['Список групп расходов', ]
-    group_in_text += group_load(GROUP_ENDPOINT, API_TOKEN)
+    group_in_text: list = group_load(GROUP_ENDPOINT, API_TOKEN)
     if text in group_in_text:
-        group_id = group_in_text.index(text)
-        cost = int(COST.get(chat.id))
-        post_api(ENDPOINT, API_TOKEN, chat.id, cost, group_id)
+        cost = int(context.user_data["text"])
+        post_api(ENDPOINT, API_TOKEN, chat.id, cost, text)
         update.message.reply_text(
             f'Расходы в сумме {cost} руб. запиcаны в категорию: "{text}" .',
             reply_markup=ReplyKeyboardRemove()
@@ -114,23 +114,44 @@ def cancel(update, _):
 def check(update, context):
     """Запрос статистики расходов по категориям."""
 
+    text = update.message.text
+    dt_now = datetime.date.today()
+    data_select: dict = {
+        'Месяц': 31,
+        'Неделя': 7,
+        'День': 0
+    }
+    past_date = dt_now - datetime.timedelta(days=data_select[text])
     logging.info('Check function is starting.')
     chat_id = update.effective_chat.id
     response = get_all_costs(ENDPOINT, chat_id, API_TOKEN)
     group_dict: dict = {}
-    for r in response.json():
-        try:
-            group_dict[r.get("group")] += int(r.get("cost"))
-        except KeyError:
-            group_dict[r.get("group")] = int(r.get("cost"))
-    group_dict["Всего"] = sum(group_dict.values())
 
+    for r in response.json():
+        date = datetime.datetime.strptime(
+            r.get("pub_date"), '%Y-%m-%dT%H:%M:%S.%f%z')
+        date = datetime.date(year=date.year, month=date.month, day=date.day)
+        if date >= past_date:
+            try:
+                group_dict[r.get("group")] += int(r.get("cost"))
+            except KeyError:
+                group_dict[r.get("group")] = int(r.get("cost"))
+
+    if group_dict:
+        group_dict["Всего"] = sum(group_dict.values())
+    else:
+        context.bot.send_message(chat_id=chat_id, text='нет данных')
+        return ConversationHandler.END
     text: str = 'Всего расходов по категориям: \n'
     for group in group_dict:
         text += (f'{group}: '
                  f'{group_dict[group]} руб. \n')
-    context.bot.send_message(chat_id=chat_id, text=text)
+    update.message.reply_text(
+            text,
+            reply_markup=ReplyKeyboardRemove()
+        )
     logging.info(f'Message: {text} was sent to: {chat_id} .')
+    return ConversationHandler.END
 
 
 def check_tokens() -> bool:
@@ -152,14 +173,13 @@ def main():
     updater = Updater(token=TELEGRAM_BOT_TOKEN)
 
     updater.dispatcher.add_handler(CommandHandler('start', wake_up))
-    updater.dispatcher.add_handler(CommandHandler('check', check))
 
     conv_handler = ConversationHandler(
         entry_points=[MessageHandler(Filters.text, have_massege)],
         fallbacks=[CommandHandler('cancel', cancel)],
         states={
-            ALL_GROUP: [
-                MessageHandler(Filters.text, cost_download)],
+            SAVE: [
+                MessageHandler(Filters.text, cost_save)],
             CHECK: [
                 MessageHandler(Filters.text, check)]},
     )

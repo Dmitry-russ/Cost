@@ -17,7 +17,7 @@ class CostSerializer(serializers.ModelSerializer):
     text = serializers.CharField(required=False)
     group = serializers.SlugRelatedField(
         slug_field='title',
-        read_only=True
+        queryset=Group.objects.all()
     )
 
     class Meta:
@@ -26,6 +26,7 @@ class CostSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Group
         fields = '__all__'

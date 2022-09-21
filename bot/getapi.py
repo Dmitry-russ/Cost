@@ -11,13 +11,13 @@ def get_token(USER_ENDPOINT, USER, PASSWORD) -> str:
     return f'Bearer {response.get("access")}'
 
 
-def post_api(ENDPOINT, API_TOKEN, chat_id, cost, group_id):
+def post_api(ENDPOINT, API_TOKEN, chat_id, cost, group):
     """Запись нового расхода в базу данных api."""
 
     requests.post(
         url=ENDPOINT,
         headers={'Authorization': API_TOKEN},
-        data={'chat_id': chat_id, 'cost': cost, 'group': group_id}
+        data={'chat_id': chat_id, 'cost': cost, 'group': group}
     ).json()
 
 
