@@ -15,6 +15,10 @@ class CostSerializer(serializers.ModelSerializer):
         read_only=True
     )
     text = serializers.CharField(required=False)
+    group = serializers.SlugRelatedField(
+        slug_field='title',
+        read_only=True
+    )
 
     class Meta:
         model = Cost

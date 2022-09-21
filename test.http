@@ -1,0 +1,29 @@
+GET http://127.0.0.1:8000/api/
+Content-type: application/json; charset=utf-8
+limit: 10
+
+###
+GET http://127.0.0.1:8000/api/v1/follow/
+Content-type: application/json; charset=utf-8
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU3MjkyMjQxLCJqdGkiOiJlNzhjZDU1NGM0YTQ0MjQ0YjhiNDAwYWMxMTczMjBiYiIsInVzZXJfaWQiOjF9.QYAEWJJigFy1uWE5FR9m7PIps_XZkjyBZkGbgp3jWwM
+
+
+###
+POST http://127.0.0.1:8000/api/v1/posts/
+Content-type: application/json; charset=utf-8
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU3MjkzNjQzLCJqdGkiOiI2ZmUzOTViNzAyZDU0M2FlYTFlMTZkNTRmNTQwMzM0OCIsInVzZXJfaWQiOjJ9.TT2qiabhONWlGYZvCkPFqtqvUbVaDQ5H-rxhdzLkRnQ
+
+{
+  "text": "string55"
+}
+
+### Запрос на регистрацию
+POST http://127.0.0.1:8000/auth/users/
+Content-type: application/json; charset=utf-8
+
+{
+  "username": "Dima",
+  "password": "0123456789"
+}
+
+

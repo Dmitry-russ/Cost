@@ -8,7 +8,7 @@ from telegram.ext import (CommandHandler, Updater, MessageHandler,
                           ConversationHandler, Filters)
 
 from getapi import (get_token, post_api,
-                    group_load, get_all_costs, group_id_title)
+                    group_load, get_all_costs)
 from consts import ENDPOINT, GROUP_ENDPOINT, USER_ENDPOINT
 
 load_dotenv()
@@ -23,7 +23,7 @@ COST: dict = {}
 #  добавь обработку ошибок!
 API_TOKEN = get_token(USER_ENDPOINT, USER, PASSWORD)
 logger = logging.getLogger()
-ALL_GROUP, END = range(2)
+ALL_GROUP, CHECK, END = range(2)
 
 
 def wake_up(update, context):
@@ -36,7 +36,8 @@ def wake_up(update, context):
         text=f'{username} привет! Я бот, который поможет тебе '
              f'контролировать свои расходы. '
              f'Я могу работать только с целыми числами. '
-             f'Введи любое число, выбери категорию и все! '
+             f'Введи любое число, выбери категорию и '
+             f'я сохраню эти расходы в базу! '
              f'Для вывода статистики используй команду /check.',
     )
     logging.info(f'User {username}, {chat_id} is starting bot')
@@ -50,18 +51,25 @@ def have_massege(update, context):
     logging.info(
         f'Just another new messege: {text} from: {chat.id} . '
         'Next step is check for digit.')
+
     if text.isdigit():
         logging.info(f'Bot has new digit messege: {text} from: {chat.id} .')
         markup_key = ReplyKeyboardMarkup(
             [group_load(GROUP_ENDPOINT, API_TOKEN)], one_time_keyboard=True,
             resize_keyboard=True)
         update.message.reply_text(
-            'Выберете категорию расхода. Для отмены нажмите /cancel.',
+            'Выберете категорию расходов. Для отмены нажмите /cancel.',
             reply_markup=markup_key, )
+        # вот здесь убрать лишний словарь
         COST[chat.id] = text
         logging.info(
             'Messege: {text} from: {chat.id} was saved befor choosing group.')
         return ALL_GROUP
+    elif text = '/check':
+        markup_key = ReplyKeyboardMarkup(
+            ['Месяц', 'Неделя', 'День'], one_time_keyboard=True,
+            resize_keyboard=True)   
+            # здесь дописать
 
 
 def cost_download(update, _):
@@ -77,7 +85,7 @@ def cost_download(update, _):
         cost = int(COST.get(chat.id))
         post_api(ENDPOINT, API_TOKEN, chat.id, cost, group_id)
         update.message.reply_text(
-            f'Расход в сумме {cost} руб. запиcан в категорию: "{text}" .',
+            f'Расходы в сумме {cost} руб. запиcаны в категорию: "{text}" .',
             reply_markup=ReplyKeyboardRemove()
         )
         logging.info(
@@ -85,7 +93,8 @@ def cost_download(update, _):
             )
         return ConversationHandler.END
     update.message.reply_text(
-        'Категория не выбрана.',
+        'Категория не выбрана. '
+        'Повторите ввод данных если хотите сохранить расходы.',
         reply_markup=ReplyKeyboardRemove()
     )
     return ConversationHandler.END
@@ -108,18 +117,17 @@ def check(update, context):
     logging.info('Check function is starting.')
     chat_id = update.effective_chat.id
     response = get_all_costs(ENDPOINT, chat_id, API_TOKEN)
-    group_dict: dict = {r.get("group"): 0 for r in response.json()}
-
+    group_dict: dict = {}
     for r in response.json():
-        group_dict[r.get("group")] += int(r.get("cost"))
-    #  код ниже мне не нравится, но я пока не знаю как его переделать
-    group_dict["всего"] = sum(group_dict.values())
-    group_id_title_dict = group_id_title(GROUP_ENDPOINT, API_TOKEN)
-    group_id_title_dict["всего"] = "всего"
+        try:
+            group_dict[r.get("group")] += int(r.get("cost"))
+        except KeyError:
+            group_dict[r.get("group")] = int(r.get("cost"))
+    group_dict["Всего"] = sum(group_dict.values())
+
     text: str = 'Всего расходов по категориям: \n'
-    logging.info(f'Message: {text} was sent to: {chat_id} .')
     for group in group_dict:
-        text += (f'{str((group_id_title_dict.get(group))).lower()}: '
+        text += (f'{group}: '
                  f'{group_dict[group]} руб. \n')
     context.bot.send_message(chat_id=chat_id, text=text)
     logging.info(f'Message: {text} was sent to: {chat_id} .')
@@ -129,7 +137,7 @@ def check_tokens() -> bool:
     """Проверка наличия переменных в окружении."""
 
     logging.info('Check_tokens is starting.')
-    return all([TELEGRAM_BOT_TOKEN, ])
+    return all([TELEGRAM_BOT_TOKEN, USER, PASSWORD])
 
 
 def main():
@@ -141,21 +149,19 @@ def main():
         raise sys.exit()
     logging.info('Main function is strating.')
 
-    group_in_text: str = ""
-    for group in group_load(GROUP_ENDPOINT, API_TOKEN):
-        group_in_text += group + '|'
-
     updater = Updater(token=TELEGRAM_BOT_TOKEN)
 
     updater.dispatcher.add_handler(CommandHandler('start', wake_up))
     updater.dispatcher.add_handler(CommandHandler('check', check))
+
     conv_handler = ConversationHandler(
         entry_points=[MessageHandler(Filters.text, have_massege)],
+        fallbacks=[CommandHandler('cancel', cancel)],
         states={
             ALL_GROUP: [
-                MessageHandler(Filters.regex(f'^({group_in_text})$'),
-                               cost_download)]},
-        fallbacks=[CommandHandler('cancel', cancel)],
+                MessageHandler(Filters.text, cost_download)],
+            CHECK: [
+                MessageHandler(Filters.text, check)]},
     )
 
     updater.dispatcher.add_handler(conv_handler)

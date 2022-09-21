@@ -31,19 +31,6 @@ def group_load(GROUP_ENDPOINT, API_TOKEN) -> list:
     return [r.get("title") for r in response.json()]
 
 
-def group_id_title(GROUP_ENDPOINT, API_TOKEN) -> dict:
-    """Запрос словаря id=группа для соответствия имен при выводе."""
-
-    response = requests.get(
-        url=GROUP_ENDPOINT,
-        headers={'Authorization': API_TOKEN},
-    )
-    group_id_title_dict: dict = {}
-    for r in response.json():
-        group_id_title_dict[r.get("id")] = r.get("title")
-    return group_id_title_dict
-
-
 def get_all_costs(ENDPOINT, chat_id, API_TOKEN) -> requests:
     """Запрос данных о всех сохраненных расходах пользователя."""
 
