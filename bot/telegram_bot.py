@@ -53,8 +53,9 @@ def have_massege(update, context):
 
     if text.isdigit():
         logging.info(f'Bot has new digit messege: {text} from: {chat.id} .')
+        all_groups = group_load(GROUP_ENDPOINT, API_TOKEN)
         markup_key = ReplyKeyboardMarkup(
-            [group_load(GROUP_ENDPOINT, API_TOKEN)], one_time_keyboard=True,
+            [all_groups[:3], all_groups[3:]], one_time_keyboard=True,
             resize_keyboard=True)
         update.message.reply_text(
             'Выберете категорию расходов. Для отмены нажмите /cancel.',
@@ -100,17 +101,6 @@ def cost_save(update, context):
     return ConversationHandler.END
 
 
-def cancel(update, _):
-    """Отмена ввода расхода."""
-
-    update.message.reply_text(
-        'Ввод отменен.',
-        reply_markup=ReplyKeyboardRemove()
-    )
-    logging.info('Cancel button.')
-    return ConversationHandler.END
-
-
 def check(update, context):
     """Запрос статистики расходов по категориям."""
 
@@ -151,6 +141,17 @@ def check(update, context):
             reply_markup=ReplyKeyboardRemove()
         )
     logging.info(f'Message: {text} was sent to: {chat_id} .')
+    return ConversationHandler.END
+
+
+def cancel(update, _):
+    """Отмена ввода расхода."""
+
+    update.message.reply_text(
+        'Ввод отменен.',
+        reply_markup=ReplyKeyboardRemove()
+    )
+    logging.info('Cancel button.')
     return ConversationHandler.END
 
 
